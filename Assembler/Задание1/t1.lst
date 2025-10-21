@@ -1,0 +1,27 @@
+     1                                  global _start
+     2                                  section .data
+     3 00000000 48656C6C6F20776F72-     message db "Hello world!",10
+     3 00000009 6C64210A           
+     4                                  length equ $ - message
+     5                                  section .text
+     6                                  _start:
+     7 00000000 B801000000              mov rax, 1
+     8 00000005 BF01000000              mov rdi, 1
+     9 0000000A 48BE-                   mov rsi, message
+     9 0000000C [0000000000000000] 
+    10 00000014 BA0D000000              mov rdx, length
+    11 00000019 0F05                    syscall
+    12                                  
+    13 0000001B 4883F80D                cmp rax,length
+    14 0000001F 740C                    jz end
+    15                                  
+    16 00000021 B83C000000              mov rax, 60
+    17 00000026 BF01000000              mov rdi, 1
+    18 0000002B 0F05                    syscall
+    19                                  
+    20                                  end:
+    21 0000002D B83C000000              mov rax, 60
+    22 00000032 BF00000000              mov rdi, 0
+    23 00000037 0F05                    syscall
+    24                                  
+    25                                  
