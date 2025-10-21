@@ -1,0 +1,37 @@
+     1                                  global _start
+     2                                  section .data
+     3 00000000 48656C6C6F20776F72-     message db "Hello world!",10
+     3 00000009 6C64210A           
+     4                                  length equ $ - message
+     5 0000000D 74787400                failname db "txt",0
+     6                                  section .text
+     7                                  _start:
+     8 00000000 B801010000              mov rax, 257
+     9 00000005 48C7C79CFFFFFF          mov rdi, -100
+    10 0000000C 48BE-                   mov rsi, failname
+    10 0000000E [0D00000000000000] 
+    11 00000016 BA65000000              mov rdx, 101
+    12 0000001B 41BAB6010000            mov r10, 438
+    13 00000021 0F05                    syscall
+    14                                  
+    15 00000023 4889C7                  mov rdi, rax
+    16 00000026 B801000000              mov rax, 1
+    17 0000002B 48BE-                   mov rsi, message
+    17 0000002D [0000000000000000] 
+    18 00000035 BA0D000000              mov rdx, length
+    19 0000003A 0F05                    syscall
+    20                                  
+    21                                  ; cmp rax,length
+    22                                  ; jz end
+    23                                  
+    24 0000003C B803000000              mov rax, 3
+    25 00000041 0F05                    syscall
+    26                                  
+    27 00000043 B83C000000              mov rax, 60
+    28 00000048 BF00000000              mov rdi, 0
+    29 0000004D 0F05                    syscall
+    30                                  
+    31                                  end:
+    32 0000004F B83C000000              mov rax, 60
+    33 00000054 BF01000000              mov rdi, 1
+    34 00000059 0F05                    syscall
