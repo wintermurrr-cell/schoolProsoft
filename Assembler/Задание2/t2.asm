@@ -1,34 +1,57 @@
-global _start
-section .data
-message db "Hello world!",10
-length equ $ - message
-failname db "txt",0
-section .text
-_start:
-mov rax, 257
-mov rdi, -100
-mov rsi, failname
-mov rdx, 101
-mov r10, 438
-syscall
+ 
+global _start; Объявляем точку входа _start глобальной для линковщика
 
-mov rdi, rax
-mov rax, 1
-mov rsi, message
-mov rdx, length
-syscall
+section .data; Секция данных (инициализированные данные)
 
-; cmp rax,length
-; jz end
+message db "Hello world!",10 ; Сообщение которое будем выводить "Hello world!", с переходом на новую строку(10)
+length equ $ - message ; Считаем автоматически длину строки
 
-mov rax, 3
-syscall
+error_msg db "an error occurred while executing the program",10 ; Сообщение которое будем выводить при ошибке "во время выполнения программы произошла ошибка", с переходом на новую строку(10)
+error_msg_length equ $ - error_msg ; Считаем автоматически длину строки
 
-mov rax, 60
-mov rdi, 0
-syscall
+filename db "txt",0 ; Имя текстового файла
 
-end:
-mov rax, 60
-mov rdi, 1
-syscall
+section .text ; Секция кода - исполняемая программа
+_start: ; Точка входа программы
+mov rax, 257 ; Номер системного вызова openat
+mov rdi, -100 ; Специальный файловый дескриптор AT_FDCWD (-100) - текущая директория
+mov rsi, filename ; Имя создаваемого текстового файла
+mov rdx, 101 ; Флаги доступа: O_CREAT | O_WRONLY
+mov r10, 666q ; суффикс q помечает число для восьмеричной системы счисления
+syscall ; Выполняем системный вызов создания и открытия файла
+
+cmp rax, 0 ; Сравниваем возвращаемое значение с 0
+jl error_end ; Если отрицательное - ошибка
+
+mov rdi, rax ; В rdi будет помещен файловый дескриптор, куда следует поместить информацию при вызове write
+mov rax, 1 ; номер системного вызова вывода (write)
+mov rsi, message ; указатель на строку "Hello world!"
+mov rdx, length ; длина строки для записи
+syscall ; Выполняем системный вызов записи в файл
+
+cmp rax, 0 ; Сравниваем возвращаемое значение с 0
+jl error_end ; Если отрицательное - ошибка
+
+cmp rax,length ; Сравниваем возвращенное значение с длинной
+jnz error_end ; Если они не равны, то возвращаем ошибку
+
+mov rax, 3  ; номер системного вызова close(закрытие)
+syscall ; Системный вызов  для закрытие файла
+
+cmp rax, 0 ; Сравниваем возвращаемое значение с 0
+jl error_end ; Если отрицательное - ошибка
+
+mov rax, 60 ; номер системного вызова выход (exit)
+mov rdi, 0 ; код возврата 0 (успешное)
+syscall ; Системный вызов exit (успешное завершение)
+
+error_end: ; Вывод сообщения об ошибке
+mov rax, 1 ; Системный вызов write (вывод)
+mov rdi, 2 ; Дескриптор файла stderr (стандартный вывод ошибок)
+mov rsi, error_msg ; Адрес сообщения об ошибке
+mov rdx, error_msg_length ; Длина сообщения об ошибке
+syscall ;  Системный вызов вывода сообщения об ошибке
+
+mov rax, 60 ; Системный вызов exit
+mov rdi, 1 ; Код ошибки
+syscall ; Вызов системной функции выход с кодом ошибки

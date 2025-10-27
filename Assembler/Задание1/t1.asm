@@ -1,25 +1,39 @@
-global _start
-section .data
-message db "Hello world!",10
-length equ $ - message
-section .text
-_start:
-mov rax, 1
-mov rdi, 1
-mov rsi, message
-mov rdx, length
-syscall
 
-cmp rax,length
-jz end
+global _start ; Объявляем точку входа _start глобальной для линковщика
 
-mov rax, 60
-mov rdi, 1
-syscall
+section .data ; Секция данных (инициализированные данные)
 
-end:
-mov rax, 60
-mov rdi, 0
-syscall
+message db "Hello world!",10 ; Сообщение которое будем выводить "Hello world!", с переходом на новую строку(10)
+length equ $ - message ; Считаем автоматически длину строки
 
+error_msg db "an error occurred while executing the program",10 ; Сообщение которое будем выводить при ошибке "во время выполнения программы произошла ошибка", с переходом на новую строку(10)
+error_msg_length equ $ - error_msg ; Считаем автоматически длину строки
 
+section .text ; Секция кода (исполняемая программа)
+_start:; Точка входа программы
+mov rax, 1 ; Вызов функции write(вывод)
+mov rdi, 1 ; Стандартный вывод
+mov rsi, message ; Адрес строки для вывода
+mov rdx, length ; Длинна строки
+syscall ; Выполняем системный вызов write(вывод)
+
+cmp rax, 0 ; Сравниваем возвращаемое значение с 0
+jl error_end ; Если отрицательное - ошибка
+
+cmp rax,length ; Сравниваем возвращенное значение с ожидаемой длиной
+jnz error_end ; Если они равны продолжаем выполнение программы
+
+mov rax, 60 ; 60 - номер системного вызова exit(выход)
+mov rdi, 0 ; код успешного завершения 0
+syscall ; Выполняем системный вызов-выход
+
+error_end: ; Вывод сообщения об ошибке
+mov rax, 1 ; Системный вызов write (вывод)
+mov rdi, 2 ; Дескриптор файла stderr (стандартный вывод ошибок)
+mov rsi, error_msg ; Адрес сообщения об ошибке
+mov rdx, error_msg_length ; Длина сообщения об ошибке
+syscall ; Системной вызов вывода об ошибке
+
+mov rax, 60 ; Системный вызов exit
+mov rdi, 1 ; Код ошибки
+syscall ; Вызов системной функции выход с кодом ошибки
